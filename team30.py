@@ -1,4 +1,5 @@
 import random
+import copy
 inf = 1000000000000
 
 class Player30:
@@ -21,7 +22,7 @@ class Player30:
 		return ans
 
 	def max_value(self,board,block,allowed_moves,flag,a,b,depth):
-		if depth>=5:
+		if depth>5:
 			return random.randrange(1,50),allowed_moves[0]
 		#if self.win(block,flag):
 		#	return self.win(block,flag)
@@ -29,14 +30,11 @@ class Player30:
 		v = -1*inf
 		ans = allowed_moves[0]
 		for move in allowed_moves:
-			print move
-			print "max_val"
 			temp_board,temp_block = self.apply_move(board,block,move,flag)
 			temp_flag = 'x'
 			if flag =='x':
 				temp_flag = 'o'
 			next_moves = self.get_moves(temp_board,temp_block,move,temp_flag)
-			print next_moves
 			x,qq = self.min_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
 			if v < x:
 				v = x
@@ -47,7 +45,7 @@ class Player30:
 		return v,ans
 
 	def min_value(self,board,block,allowed_moves,flag,a,b,depth):
-		if depth>=2:
+		if depth>5:
 			return random.randrange(1,50),allowed_moves[0]
 		#if self.win(block,flag):
 		#	return self.win(block,flag)
@@ -55,17 +53,12 @@ class Player30:
 		v = inf
 		ans = allowed_moves[0]
 		for move in allowed_moves:
-			print move
-			print "min_value"
 			temp_board,temp_block = self.apply_move(board,block,move,flag)
-			self.print_lists(board,block)
 			temp_flag = 'x'
 			if flag =='x':
 				temp_flag = 'o'
 			next_moves = self.get_moves(temp_board,temp_block,move,temp_flag)
-			print next_moves
 			x,qq = self.max_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
-			print "hualla"
 			if v > x:
 				v = x
 				ans = move 
@@ -95,9 +88,11 @@ class Player30:
 		print
 	
 	def apply_move(self,board,block,move,flag):
-		board[move[0]][move[1]] = flag
-		block = self.update_block(board,block,move,flag)
-		return board,block
+		block2 = copy.deepcopy(block)
+		board2 = copy.deepcopy(board)
+		board2[move[0]][move[1]] = flag
+		block2 = self.update_block(board2,block2,move,flag)
+		return board2,block
 
 	def update_block(self,board,block,move,flag):
 		block_r = move[0]/3
@@ -112,9 +107,7 @@ class Player30:
 			elif(board[j][move[1]] == flag):
 				count+=1
 		if count == 3:
-			list1 = list(block)
-			list1[3*block_r+block_c] = flag
-			block = ''.join(list1)
+			block[3*block_r+block_c] = flag
 			return block
 
 		#vertical direction
@@ -126,9 +119,7 @@ class Player30:
 			elif(board[move[0]][j] == flag):
 				count+=1
 		if count == 3:
-			list1 = list(block)
-			list1[3*block_r+block_c] = flag
-			block = ''.join(list1)
+			block[3*block_r+block_c] = flag
 			return block
 
 		#diagonal-left direction
@@ -141,9 +132,7 @@ class Player30:
 			elif(board[j][k] == flag):
 				count+=1
 		if count == 3:
-			list1 = list(block)
-			list1[3*block_r+block_c] = flag
-			block = ''.join(list1)
+			block[3*block_r+block_c] = flag
 			return block
 
 		#diagonal-right direction
@@ -156,9 +145,7 @@ class Player30:
 			elif(board[j][k] == flag):
 				count+=1
 		if count == 3:
-			list1 = list(block)
-			list1[3*block_r+block_c] = flag
-			block = ''.join(list1)
+			block[3*block_r+block_c] = flag
 		
 		return block
 
