@@ -24,8 +24,8 @@ class Player30:
 	def max_value(self,board,block,allowed_moves,flag,a,b,depth):
 		if depth>5:
 			return random.randrange(1,50),allowed_moves[0]
-		#if self.win(block,flag):
-		#	return self.win(block,flag)
+		if self.win(block,flag):
+			return self.win(block,flag)
 
 		v = -1*inf
 		ans = allowed_moves[0]
@@ -47,8 +47,8 @@ class Player30:
 	def min_value(self,board,block,allowed_moves,flag,a,b,depth):
 		if depth>5:
 			return random.randrange(1,50),allowed_moves[0]
-		#if self.win(block,flag):
-		#	return self.win(block,flag)
+		if self.win(block,flag):
+			return self.win(block,flag)
 
 		v = inf
 		ans = allowed_moves[0]
@@ -66,6 +66,27 @@ class Player30:
 				return v,ans
 			b = min(b,v)
 		return v,ans
+
+	def win(self,block,flag):
+		sblock = []
+		new = []
+		for i in range(3):
+			for j in range(3):
+				new.append(block[3*i+j])
+			sblock.append(new)
+			new = []
+
+		a = self.check(sblock,flag)
+		if a:
+			return 1
+		nflag = 'x'
+		if(flag == 'x'):
+			nflag = 'o'
+		a = self.check(sblock,nflag)
+		if a:
+			return -1
+		return 0
+			
 
 	def print_lists(self,gb, bs):
 		print '=========== Game Board ==========='
@@ -220,4 +241,3 @@ class Player30:
 						if board[j][k] == '-':
 							cells.append((j,k))
 		return cells
-
