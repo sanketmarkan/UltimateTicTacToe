@@ -22,10 +22,10 @@ class Player30:
 		return ans
 
 	def max_value(self,board,block,allowed_moves,flag,a,b,depth):
-		if depth>5:
-			return random.randrange(1,50),allowed_moves[0]
 		if self.win(block,flag):
-			return self.win(block,flag)
+			return 10000*self.win(block,flag),allowed_moves[0]
+		if depth>4:
+			return self.eval(board,block,flag),allowed_moves[0]
 
 		v = -1*inf
 		ans = allowed_moves[0]
@@ -35,7 +35,10 @@ class Player30:
 			if flag =='x':
 				temp_flag = 'o'
 			next_moves = self.get_moves(temp_board,temp_block,move,temp_flag)
-			x,qq = self.min_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
+			if len(next_moves) == 0:
+				x = 10000*self.win(temp_block,flag)
+			else:
+				x,qq = self.min_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
 			if v < x:
 				v = x
 				ans = move
@@ -45,11 +48,11 @@ class Player30:
 		return v,ans
 
 	def min_value(self,board,block,allowed_moves,flag,a,b,depth):
-		if depth>5:
-			return random.randrange(1,50),allowed_moves[0]
 		if self.win(block,flag):
-			return self.win(block,flag)
-
+			return 10000*self.win(block,flag),allowed_moves[0]
+		if depth>4:
+			return self.eval(board,block,flag),allowed_moves[0]
+		
 		v = inf
 		ans = allowed_moves[0]
 		for move in allowed_moves:
@@ -58,7 +61,10 @@ class Player30:
 			if flag =='x':
 				temp_flag = 'o'
 			next_moves = self.get_moves(temp_board,temp_block,move,temp_flag)
-			x,qq = self.max_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
+			if len(next_moves) == 0:
+				x = 10000*self.win(temp_block,flag)
+			else:
+				x,qq = self.max_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
 			if v > x:
 				v = x
 				ans = move 
@@ -67,26 +73,86 @@ class Player30:
 			b = min(b,v)
 		return v,ans
 
-	def win(self,block,flag):
-		sblock = []
-		new = []
-		for i in range(3):
+	def check(self,block,flag):
+		inline = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+		for i in range(8):
+			count = 0
 			for j in range(3):
-				new.append(block[3*i+j])
-			sblock.append(new)
-			new = []
+				if block[inline[i][j]] == flag:
+					count+=1
+			if count == 3:
+				return True
+		return False
 
-		a = self.check(sblock,flag)
+	def win(self,block,flag):
+		a = self.check(block,flag)
 		if a:
 			return 1
 		nflag = 'x'
 		if(flag == 'x'):
 			nflag = 'o'
-		a = self.check(sblock,nflag)
+		a = self.check(block,nflag)
 		if a:
 			return -1
 		return 0
-			
+
+	def eval2(self,temp_board,inline,flag):
+		oflag = 'x'
+		val = 0
+		if flag == 'x':
+			oflag = 'o'
+		for i in range(8):
+			c1 = 0
+			c2 = 0
+			for j in range(3):
+				if temp_board[inline[i][j]] == flag:
+					c1+=1
+				elif temp_board[inline[i][j]] == oflag:
+					c2+=1
+			#some values are here
+			if c2 ==3 and c1 == 0:
+				val += 100
+			elif c1 == 2 and c2 == 0:
+				val += 10
+			elif c1 == 1 and c2 == 0:
+				val += 1
+			elif c1 == 3 and c2 == 0:
+				val += 100
+			elif c1 == 0 and c2 == 2:
+				val -= 10
+			elif c1 == 0 and c2 == 1:
+				val -= 1
+		#	print val,
+		#print temp_board
+		return val
+
+
+	def eval(self,board,block,flag):
+		inline = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+		val = []
+		for k in range(9):
+			r = k/3
+			c = k%3
+			#print r,c
+			temp_board = []
+			for i in range(3):
+				for j in range(3):
+					#print i+3*r,j+3*c,"            ",
+					temp_board.append(board[i+3*r][j+3*c])
+				#print
+			val.append(self.eval2(temp_board,inline,flag))
+		####print val
+		maa = -1*inf
+		mia = inf
+		for i in range(8):
+			value = 0
+			for j in range(3):
+				value += val[inline[i][j]]
+			maa = max(maa,value)
+			mia = min(mia,value)
+
+		#print maa,mia
+		return maa+mia+self.eval2(block,inline,flag)
 
 	def print_lists(self,gb, bs):
 		print '=========== Game Board ==========='
@@ -113,7 +179,7 @@ class Player30:
 		board2 = copy.deepcopy(board)
 		board2[move[0]][move[1]] = flag
 		block2 = self.update_block(board2,block2,move,flag)
-		return board2,block
+		return board2,block2
 
 	def update_block(self,board,block,move,flag):
 		block_r = move[0]/3
