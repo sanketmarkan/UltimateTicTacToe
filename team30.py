@@ -31,15 +31,14 @@ class Player30:
 		return self.winningposs(board,block,flag)
 
 	def max_value(self,board,block,allowed_moves,flag,a,b,depth,rtime):
-		"""t = 0.00004
+		t = 0.00004
 		if rtime <= 2*t:
 			a = 1
 			if depth % 2:
 				a = -1
 			return a*self.eval(board,block,flag),allowed_moves[0]
-		"""
-		if depth > 4:
-			return -1*self.eval(board,block,flag),allowed_moves[0]
+		#if depth > 4:
+		#	return -1*self.eval(board,block,flag),allowed_moves[0]
 		v = -1*inf
 		ans = allowed_moves[0]
 		#print rtime/float((len(allowed_moves)))
@@ -67,7 +66,7 @@ class Player30:
 		#if depth == 1:
 		#	print rtime
 #		global t,de
-		"""t = 0.00004
+		t = 0.00004
 
 #		de = max(de,depth)
 		if rtime <= 2*t:
@@ -75,9 +74,8 @@ class Player30:
 			if depth % 2:
 				a = -1
 			return a*self.eval(board,block,flag),allowed_moves[0]
-		"""
-		if depth > 4:
-			return -1*self.eval(board,block,flag),allowed_moves[0]
+		#if depth > 4:
+		#	return -1*self.eval(board,block,flag),allowed_moves[0]
 		
 		v = inf
 		ans = allowed_moves[0]
@@ -137,15 +135,15 @@ class Player30:
 				if oflag in fil_seq:
 					continue
 				if len(fil_seq) > 1:
-					pc += 9
+					pc += 7
 				if len(fil_seq) > 2:
-					pc += 990
+					pc += 7
 				pc += 1
 			elif oflag in fil_seq:
 				if len(fil_seq) > 1:
-					oc += 9
+					oc += 7
 				if len(fil_seq) > 2:
-					oc += 990
+					oc += 7
 				oc += 1
 		return pc - oc
 
@@ -167,8 +165,7 @@ class Player30:
 			return 0
 
 		lis2 = []
-		ret = 0
-		#ret = 25*self.evalwp(block,inline,flag)
+		ret = 25*self.evalwp(block,inline,flag)
 		for i in range(9):
 			r = i/3
 			c = i%3
@@ -177,32 +174,30 @@ class Player30:
 				for k in range(3):
 					lis.append(board[3*r+j][3*c+k])
 			temp = self.evalwp(lis,inline,flag)
-			temp /=1000.0
 			lis2.append(temp)
 			ret += temp
-		ret = 0
+
 		for i in range(8):
 			prob = 0
 			for j in range(3):
 				prob += lis2[inline[i][j]]
-			#prob /= 15.0
+			prob /= 15.0
 			if prob<=-3:
-				ret = ret + ( -3 + (prob+3)*(990)) *2000
+				ret = ret + ( -3 - (prob+3)*(15-8)) *30
 			elif prob>-3 and prob<=-2:
-				ret = ret +  ( -2 + (prob+2)*(9) )*2000
+				ret = ret +  ( -2 - (prob+2)*(8-1) )*30
 			elif prob>-2 and prob<=-1:
-				ret = ret + ( - 1 + (prob+1)*(1))*2000
+				ret = ret + ( - 1 - (prob+1)*(1-0))*30
 			elif prob>-1 and prob<=0:
-				ret = ret + (prob*(0+1))*2000
+				ret = ret + (prob*(0+1))*30
 			elif prob > 0 and prob <= 1:
-				ret = ret +( prob*(1-0))*2000
+				ret = ret +( prob*(1-0))*30
 			elif prob>1 and prob<=2:
-				ret = ret + (1 + (prob-1)*(1-0))*2000
+				ret = ret + (1 + (prob-1)*(1-0))*30
 			elif prob> 2 and prob<=3:
-				ret = ret + (2 + (prob-2)*(8+1))*2000
+				ret = ret + (2 + (prob-2)*(8-1))*30
 			elif prob>3:
-				ret = ret + (3 + (prob-3)*(990) )*2000
-
+				ret = ret + (3 + (prob-3)*(15-8) )*30
 		return ret
 
 	def print_lists(self,gb, bs):
