@@ -1,16 +1,22 @@
 import random
 import copy
+import time
 inf = 1000000000000
 
 class Player30:
+
 	def move(self,board,block,old_move,flag):
+		global t,de
+		de = 0
+		t2 = time.time()
+		t = 0.000007
 		if(old_move[0] == -1 and old_move[1] == -1):
                         return (4,4)
 		allowed_moves = self.get_moves(board,block,old_move,flag)
 
 		move = self.heuristic_func(board,block,allowed_moves,flag)
-		#print move
-		#heuristic function here
+		print time.time() - t2
+		print de
 		return move
 
 
@@ -18,17 +24,27 @@ class Player30:
 		return self.alpha_beta(board,block,allowed_moves,flag)
 		#return allowed_moves[random.randrange(len(allowed_moves))]
 	def alpha_beta(self,board,block,allowed_moves,flag):
-		x,ans = self.max_value(board,block,allowed_moves,flag,-1*inf,inf,0)
+		x,ans = self.max_value(board,block,allowed_moves,flag,-1*inf,inf,0,11.8/1.0)
 		return ans
 
-	def max_value(self,board,block,allowed_moves,flag,a,b,depth):
-		if self.win(block,flag):
-			return 10000*self.win(block,flag),allowed_moves[0]
-		if depth>4:
-			return self.eval(board,block,flag),allowed_moves[0]
+	def eval(self,board,block,flag):
+		return self.winningposs(board,block,flag)
 
+	def max_value(self,board,block,allowed_moves,flag,a,b,depth,rtime):
+		"""t = 0.00004
+		if rtime <= 2*t:
+			a = 1
+			if depth % 2:
+				a = -1
+			return a*self.eval(board,block,flag),allowed_moves[0]
+		"""
+		if depth > 4:
+			return -1*self.eval(board,block,flag),allowed_moves[0]
 		v = -1*inf
 		ans = allowed_moves[0]
+		#print rtime/float((len(allowed_moves)))
+		#if depth == 0:
+		#	print allowed_moves
 		for move in allowed_moves:
 			temp_board,temp_block = self.apply_move(board,block,move,flag)
 			temp_flag = 'x'
@@ -38,7 +54,7 @@ class Player30:
 			if len(next_moves) == 0:
 				x = 10000*self.win(temp_block,flag)
 			else:
-				x,qq = self.min_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
+				x,qq = self.min_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1,rtime/float(len(allowed_moves)+0.1))
 			if v < x:
 				v = x
 				ans = move
@@ -47,14 +63,25 @@ class Player30:
 			a = max(a,v)
 		return v,ans
 
-	def min_value(self,board,block,allowed_moves,flag,a,b,depth):
-		if self.win(block,flag):
-			return 10000*self.win(block,flag),allowed_moves[0]
-		if depth>4:
-			return self.eval(board,block,flag),allowed_moves[0]
+	def min_value(self,board,block,allowed_moves,flag,a,b,depth,rtime):
+		#if depth == 1:
+		#	print rtime
+#		global t,de
+		"""t = 0.00004
+
+#		de = max(de,depth)
+		if rtime <= 2*t:
+			a = 1
+			if depth % 2:
+				a = -1
+			return a*self.eval(board,block,flag),allowed_moves[0]
+		"""
+		if depth > 4:
+			return -1*self.eval(board,block,flag),allowed_moves[0]
 		
 		v = inf
 		ans = allowed_moves[0]
+		#print rtime/float((len(allowed_moves)))
 		for move in allowed_moves:
 			temp_board,temp_block = self.apply_move(board,block,move,flag)
 			temp_flag = 'x'
@@ -63,8 +90,8 @@ class Player30:
 			next_moves = self.get_moves(temp_board,temp_block,move,temp_flag)
 			if len(next_moves) == 0:
 				x = 10000*self.win(temp_block,flag)
-			else:
-				x,qq = self.max_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1)
+			else:	
+				x,qq = self.max_value(temp_board,temp_block,next_moves,temp_flag,a,b,depth+1,rtime/float(len(allowed_moves)+0.1))
 			if v > x:
 				v = x
 				ans = move 
@@ -96,63 +123,87 @@ class Player30:
 			return -1
 		return 0
 
-	def eval2(self,temp_board,inline,flag):
+	def evalwp(self,board,inline,flag):
+		if '-' not in board:
+			return 0
+		pc = 0
+		oc = 0
 		oflag = 'x'
-		val = 0
 		if flag == 'x':
 			oflag = 'o'
-		for i in range(8):
-			c1 = 0
-			c2 = 0
-			for j in range(3):
-				if temp_board[inline[i][j]] == flag:
-					c1+=1
-				elif temp_board[inline[i][j]] == oflag:
-					c2+=1
-			#some values are here
-			if c2 ==3 and c1 == 0:
-				val += 100
-			elif c1 == 2 and c2 == 0:
-				val += 10
-			elif c1 == 1 and c2 == 0:
-				val += 1
-			elif c1 == 3 and c2 == 0:
-				val += 100
-			elif c1 == 0 and c2 == 2:
-				val -= 10
-			elif c1 == 0 and c2 == 1:
-				val -= 1
-		#	print val,
-		#print temp_board
-		return val
+		for seq in inline:
+			fil_seq = [board[i] for i in seq if board[i] != '-']
+			if flag in fil_seq:
+				if oflag in fil_seq:
+					continue
+				if len(fil_seq) > 1:
+					pc += 9
+				if len(fil_seq) > 2:
+					pc += 990
+				pc += 1
+			elif oflag in fil_seq:
+				if len(fil_seq) > 1:
+					oc += 9
+				if len(fil_seq) > 2:
+					oc += 990
+				oc += 1
+		return pc - oc
 
-
-	def eval(self,board,block,flag):
+	def winningposs(self,board,block,flag):
 		inline = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
-		val = []
-		for k in range(9):
-			r = k/3
-			c = k%3
-			#print r,c
-			temp_board = []
-			for i in range(3):
+		if self.win(block,flag):
+			a = self.win(block,flag)
+			cells = 0
+			for i in range(9):
+				r = i/3
+				c = i%3
 				for j in range(3):
-					#print i+3*r,j+3*c,"            ",
-					temp_board.append(board[i+3*r][j+3*c])
-				#print
-			val.append(self.eval2(temp_board,inline,flag))
-		####print val
-		maa = -1*inf
-		mia = inf
-		for i in range(8):
-			value = 0
-			for j in range(3):
-				value += val[inline[i][j]]
-			maa = max(maa,value)
-			mia = min(mia,value)
+					for k in range(3):
+						if board[3*r+j][3*c+k] == '-':
+							cells += 1
+			return (10**6 + cells) * a
 
-		#print maa,mia
-		return maa+mia+self.eval2(block,inline,flag)
+		if '-' not in block:
+			return 0
+
+		lis2 = []
+		ret = 0
+		#ret = 25*self.evalwp(block,inline,flag)
+		for i in range(9):
+			r = i/3
+			c = i%3
+			lis = []
+			for j in range(3):
+				for k in range(3):
+					lis.append(board[3*r+j][3*c+k])
+			temp = self.evalwp(lis,inline,flag)
+			temp /=1000.0
+			lis2.append(temp)
+			ret += temp
+		ret = 0
+		for i in range(8):
+			prob = 0
+			for j in range(3):
+				prob += lis2[inline[i][j]]
+			#prob /= 15.0
+			if prob<=-3:
+				ret = ret + ( -3 + (prob+3)*(990)) *2000
+			elif prob>-3 and prob<=-2:
+				ret = ret +  ( -2 + (prob+2)*(9) )*2000
+			elif prob>-2 and prob<=-1:
+				ret = ret + ( - 1 + (prob+1)*(1))*2000
+			elif prob>-1 and prob<=0:
+				ret = ret + (prob*(0+1))*2000
+			elif prob > 0 and prob <= 1:
+				ret = ret +( prob*(1-0))*2000
+			elif prob>1 and prob<=2:
+				ret = ret + (1 + (prob-1)*(1-0))*2000
+			elif prob> 2 and prob<=3:
+				ret = ret + (2 + (prob-2)*(8+1))*2000
+			elif prob>3:
+				ret = ret + (3 + (prob-3)*(990) )*2000
+
+		return ret
 
 	def print_lists(self,gb, bs):
 		print '=========== Game Board ==========='

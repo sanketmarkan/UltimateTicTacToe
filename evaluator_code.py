@@ -19,6 +19,8 @@ import signal
 
 from team30 import Player30
 from team7 import Player7
+from team4v import Player4
+from team76 import Player76
 from Player import Player11
 
 class TimedOutExc(Exception):
@@ -264,6 +266,9 @@ def decide_winner_and_get_message(player,status, message):
 
 
 def print_lists(gb, bs):
+	print gb
+	print bs
+
 	print '=========== Game Board ==========='
 	for i in range(9):
 		if i > 0 and i % 3 == 0:
@@ -401,7 +406,7 @@ if __name__ == '__main__':
 	option = sys.argv[1]	
 	if option == '1':
 		obj1 = Player7()
-		obj2 = Player11()
+		obj2 = Player30()
 
 	elif option == '2':
 		obj1 = Player1()
