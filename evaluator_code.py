@@ -18,10 +18,6 @@ import random
 import signal
 
 from team30 import Player30
-from team7 import Player7
-from team4v import Player4
-from team76 import Player76
-from Player import Player11
 
 class TimedOutExc(Exception):
         pass
@@ -406,7 +402,7 @@ if __name__ == '__main__':
 	option = sys.argv[1]	
 	if option == '1':
 		obj1 = Player30()
-		obj2 = Player76()
+		obj2 = Player2()
 
 	elif option == '2':
 		obj1 = Player1()
